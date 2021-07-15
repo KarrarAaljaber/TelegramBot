@@ -3,6 +3,7 @@ import time
 import tkinter as tk
 import tkinter.filedialog as fd
 import traceback
+from tkinter import *
 
 from numpy import random
 from telethon.errors import PeerFloodError, UserPrivacyRestrictedError
@@ -26,9 +27,6 @@ class TelegramUserInviter(tk.Frame):
     No_of_participants = 0
     users = []
 
-    userAmount = None
-    nOfMsgsPerN = None
-    sleepTime = None
     msg = None
 
     def __init__(self, master=None):
@@ -42,28 +40,36 @@ class TelegramUserInviter(tk.Frame):
         self.inviteLink = None
         self.screen_width = self.master.winfo_screenwidth()
         self.screen_height = self.master.winfo_screenheight()
-        self.window_width = 600
-        self.window_height = 500
+        self.window_width = 800
+        self.window_height = 600
         self.receiver = None
         self.x_cordinate = int((self.screen_width / 2) - (self.window_width / 2))
         self.y_cordinate = int((self.screen_height / 2) - (self.window_height / 2))
-
+        self.userAmount = StringVar()
+        self.nOfMsgsPerN = StringVar()
+        self.sleepTime = StringVar()
         self.singleMessage = tk.IntVar()
         self.master.geometry(
             "{}x{}+{}+{}".format(self.window_width, self.window_height, self.x_cordinate, self.y_cordinate))
-        self.master.configure(background='orange')
+        self.master.configure(background='white')
 
         self.large_font = ('Verdana', 15)
         self.small_font = ('Verdana', 11)
+        self.mainColor = "#332767"
+        self.bg = PhotoImage(file="bg.png")
+        l = Label(self.master, image=self.bg)
+        l.place(x=0, y=0, relwidth=1, relheight=1)
 
-        tk.Label(bg="black", fg="white", width=40, height=2, text="TeleGroup User Adder",
-                 font=("Helvetica", 18, "bold")).pack()
+        title = Label(self.master, bg=self.mainColor, fg="white", width=80, height=2, text="Message Sender",
+                      borderwidth=4,
+                      relief="groove",
+                      font=("Helvetica", 18, "bold"))
+        title.pack(pady=20)
 
-        tk.Label(text="", bg="orange", height=1).pack()
-
-        tk.Button(command=self.loadFile, text="Load Accounts From File(.txt)", bg="green", fg="white", width=45,
-                  height=1,
-                  font=("Helvetica", 11, "bold")).pack()
+        tk.Button(command=self.loadFile, text="LOAD ACCOUNTS (.txt file)", bg=self.mainColor, borderwidth=4,
+                  relief="raised", fg="white", width=45,
+                  height=2,
+                  font=("Helvetica", 12, "bold")).pack()
 
     def loadFile(self):
         filetypes = (
@@ -97,21 +103,29 @@ class TelegramUserInviter(tk.Frame):
 
         for widget in self.master.winfo_children():
             widget.destroy()
+        l = Label(self.master, image=self.bg)
+        l.place(x=0, y=0, relwidth=1, relheight=1)
 
-        tk.Label(bg="black", fg="white", width=40, height=2, text="TeleGroup User Adder",
-                 font=("Helvetica", 18, "bold")).pack()
+        title = tk.Label(bg=self.mainColor, fg="white", width=80, height=2, text="Message Sender",
+                         borderwidth=4,
+                         relief="groove",
+                         font=("Helvetica", 18, "bold"))
 
-        tk.Label(text="", bg="orange", height=1).pack()
-
-        tk.Button(command=self.loadFile, text="Load Accounts From File(.txt)", bg="green", fg="white", width=45,
-                  height=1,
-                  font=("Helvetica", 11, "bold")).pack()
-
-        tk.Label(bg="black", fg="white", width=20, height=2, text="Accounts loaded: " + str(len(self.phone_numbers)),
+        title.pack(pady=20)
+        tk.Label(bg="white", borderwidth=4, relief="sunken", fg=self.mainColor, width=45, height=1,
+                 text="Accounts loaded: " + str(len(self.phone_numbers)),
                  font=("Helvetica", 12, "bold")).pack()
-        tk.Label(text="", bg="orange", height=2).pack()
 
-        tk.Button(text="Connect all accounts", command=self.connectToAllClients, bg="green", fg="white", width=35,
+        tk.Button(command=self.loadFile, text="LOAD ACCOUNTS (.txt file)", bg=self.mainColor, borderwidth=4,
+                  relief="raised", fg="white", width=45,
+                  height=2,
+                  font=("Helvetica", 12, "bold")).pack()
+
+        tk.Label(text="", bg="white", height=2).pack()
+
+        tk.Button(text="Connect To First Account", command=self.connectToAllClients, fg="white", bg=self.mainColor,
+                  borderwidth=4,
+                  relief="raised", width=35,
                   height=1,
                   font=("Helvetica", 11, "bold")).pack()
 
@@ -160,17 +174,16 @@ class TelegramUserInviter(tk.Frame):
         for i in range(0, len(self.groups)):
             groupsTitles[i] = self.groups[i].title
 
-        tk.Label(text="Scrape From", font=("Helvetica", 12, "bold"), width=30, bg="lightgreen").pack()
-        selector = tk.OptionMenu(self.master, self.selected_group, *groupsTitles, command=self.getUsers)
-        selector.config(width=30)
-        selector.pack()
+        container = tk.Frame(width=385, height=460, relief='raised', borderwidth=5)
+        container.pack(pady=20)
+        Label(container, fg="black", text="Get Users From: ", relief="sunken", font=("Helvetica", 12, "bold"),
+              bg="white").grid(row=0,
+                               column=0)
+        selector = OptionMenu(container, self.selected_group, *groupsTitles, command=self.getUsers)
+        selector.config(bg=self.mainColor, fg="white", width=30, font=("Helvetica", 12, "bold"))
+        selector.grid(row=0, column=1)
 
-        tk.Label(text="Add Users To", font=("Helvetica", 12, "bold"), width=30, bg="lightgreen").pack()
-        addTo = tk.OptionMenu(self.master, self.addToGroup, *groupsTitles, command=self.getInviteLink)
-        addTo.config(width=30)
-        addTo.pack()
-
-        start = tk.Button(text="Continue", command=self.scrap_reader, bg="green", fg="white", width=35, height=1,
+        start = tk.Button(text="Go Next", command=self.scrap_reader, bg=self.mainColor, fg="white", width=35, height=1,
                           font=("Helvetica", 11, "bold")).pack()
 
     def getUsers(self, args):
@@ -243,41 +256,56 @@ class TelegramUserInviter(tk.Frame):
         for widget in self.master.winfo_children():
             widget.destroy()
 
-        tk.Label(bg="black", fg="white", width=40, height=2, text="TeleGroup User Adder",
-                 font=("Helvetica", 18, "bold")).pack()
+        for widget in self.master.winfo_children():
+            widget.destroy()
 
-        tk.Label(text="", bg="orange", height=1).pack()
-        tk.Label(text="Number of Users loaded: " + str(self.No_of_participants), width=35, height=1, bg="white",
-                 fg="black").pack()
-        tk.Label(text="", bg="orange", height=1).pack()
-        tk.Label(text="How many users do you want to send an invite message to?", font=("Helvetica", 12, "bold"),
-                 width=50, bg="lightgreen").pack()
-        self.userAmount = tk.Entry(width=20, font=self.large_font)
-        self.userAmount.pack()
-        tk.Label(text="Enter the number of messages per number?", font=("Helvetica", 12, "bold"),
-                 width=50,
-                 bg="lightgreen").pack()
-        self.nOfMsgsPerN = tk.Entry(width=20, font=self.large_font)
-        self.nOfMsgsPerN.pack()
+        l = Label(self.master, image=self.bg)
+        l.place(x=0, y=0, relwidth=1, relheight=1)
 
-        tk.Label(text="Enter how many seconds to wait after every msg", font=("Helvetica", 12, "bold"),
-                 width=50,
-                 bg="lightgreen").pack()
-        self.sleepTime = tk.Entry(width=20, font=self.large_font)
-        self.sleepTime.pack()
+        tk.Label(bg=self.mainColor, fg="white", width=80, height=2, text="Message Sender", borderwidth=4,
+                 relief="groove",
+                 font=("Helvetica", 18, "bold")).pack(pady=20)
 
-        tk.Label(text="Enter a message", font=("Helvetica", 12, "bold"),
-                 width=50,
-                 bg="lightgreen").pack()
-        self.msg = tk.Text(width=20, height=3, font=self.small_font)
-        self.msg.pack()
+        tk.Label(bg="white", borderwidth=4, relief="sunken", fg=self.mainColor, width=45, height=1,
+                 text="Number of Users loaded: " + str(self.No_of_participants),
+                 font=("Helvetica", 12, "bold")).pack()
 
-        check = tk.Checkbutton(text="Single message?", onvalue=1, offvalue=0, variable=self.singleMessage)
-        check.pack()
+        container = tk.Frame(width=600, bg=self.mainColor, height=600, relief='raised', borderwidth=5)
+        container.pack(fill=None, expand=False)
 
-        tk.Label(text="", bg="orange", height=2).pack()
-        tk.Button(text="START", command=self.messageSender, bg="green", fg="white", width=35, height=1,
-                  font=("Helvetica", 11, "bold")).pack()
+        Label(container, text="Amount Of Users To Message", font=("Helvetica", 12, "bold"),
+              relief="sunken").grid(row=0, column=0, pady=10)
+
+        Entry(container, textvariable=self.userAmount, width=30, font=self.large_font, relief="raised").grid(row=0,
+                                                                                                             column=1,
+                                                                                                             pady=10)
+
+        Label(container, text="Messages Per number", font=("Helvetica", 12, "bold"),
+              relief="sunken",
+              ).grid(row=1, column=0, pady=10)
+
+        Entry(container, textvariable=self.nOfMsgsPerN, width=30, font=self.large_font, relief="raised").grid(row=1,
+                                                                                                              column=1,
+                                                                                                              pady=10)
+
+        Label(container, text="Seconds To Wait After Every Msg", font=("Helvetica", 12, "bold"),
+              relief="sunken",
+              ).grid(row=2, column=0, pady=10)
+
+        Entry(container, textvariable=self.sleepTime, width=30, font=self.large_font, relief="raised").grid(row=2,
+                                                                                                            column=1,
+                                                                                                            pady=10)
+
+        Label(container, text="Enter The Message", font=("Helvetica", 12, "bold"),
+              relief="sunken",
+              ).grid(row=3, column=0, pady=60)
+
+        self.msg = Text(container, width=40, height=6, font=self.small_font, relief="raised")
+        self.msg.grid(row=3, column=1, padx=10,pady=60)
+
+        tk.Button(text="Start Sending", relief="raised", command=self.messageSender, bg=self.mainColor, fg="white",
+                  width=35, height=1,
+                  font=("Helvetica", 11, "bold")).pack(pady=10)
 
     def messageSender(self):
 
@@ -337,11 +365,8 @@ class TelegramUserInviter(tk.Frame):
                             print("Total users that have been contacted : " + format(total_users_contacted))
                             print("Done running ")
                             break
-                        if self.singleMessage.get() == 1:
-                            self.client.send_message('me', self.msg.get("1.0", "end-1c") + "\n" + self.inviteLink.link)
-                        else:
-                            self.client.send_message('me', self.msg.get("1.0", "end-1c"))
-                            self.client.send_message('me', self.inviteLink.link)
+
+                        self.client.send_message("me", self.msg.get("1.0", "end-1c"))
 
                         print('message sent to {}'.format(user['name'] + " from phone number {}".format(phoneNumber)))
                         messages_sent += 1
